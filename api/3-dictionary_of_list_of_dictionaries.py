@@ -1,18 +1,20 @@
 #!/usr/bin/python3
-"""Exports to-do list information of all employees to JSON format."""
+"""Import Modules"""
 import json
 import requests
 
-if __name__ == "__main__":
-    url = "https://jsonplaceholder.typicode.com/"
-    users = requests.get(url + "users").json()
 
-    with open("todo_all_employees.json", "w") as jsonfile:
-        json.dump({
-            u.get("id"): [{
-                "task": t.get("title"),
-                "completed": t.get("completed"),
-                "username": u.get("username")
-            } for t in requests.get(url + "todos",
-                                    params={"userId": u.get("id")}).json()]
-            for u in users}, jsonfile)
+if __name__ == '__main__':
+    URL = 'https://jsonplaceholder.typicode.com'
+
+    users = requests.get(f"{URL}/users").json()
+    dic_user = {}
+    for user in users:
+        tasks = requests.get(f"{URL}/users/{user['id']}/todos").json()
+        dic_user[user['id']] = []
+        for task in tasks:
+            dic_task = {"task": task["title"], "completed": task["completed"],
+                        "username": user["username"]}
+            dic_user[user["id"]].append(dic_task)
+    with open("todo_all_employees.json", "w") as file:
+        json.dump(dic_user, file)
